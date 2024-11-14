@@ -1,4 +1,6 @@
+import axios from "axios";
 import { errorHandler } from "../utils.js/error.js";
+import ytdl from 'ytdl-core';
 
 export const test = (req, res) => {
   res.json({
@@ -32,4 +34,20 @@ export const processVideoLink = (req, res, next) => {
     } catch (error) {
       next(error); 
     }
+};
+
+export const convertVideo = async(req, res, next) =>{
+  console.log(req.body);
+  try {
+      const videoUrl = req.body;
+      const videoInfo = await ytdl.getInfo(videoUrl);
+      const audioFormats = ytdl.filterFormats(videoInfo.formats, "audioonly");
+      console.log(audioFormats);
+      audioFormats.map((item) => {
+          res.send(item.url);
+      });
+  }  catch (error) {
+    console.error('Error processing video link:', error);
+    return next(errorHandler(500, 'An unexpected error occurred.'));
+  }
 };
